@@ -3,7 +3,7 @@ function loadText(url) {
     xhr.open('GET', url, false);
     xhr.overrideMimeType("text/plain");
     xhr.send(null);
-    if(xhr.status === 200)
+    if (xhr.status === 200)
         return xhr.responseText;
     else {
         return null;
@@ -15,9 +15,23 @@ var canvas;
 var gl; //contexte
 var program; //shader program
 var attribPos; //attribute position
-var pointSize = 10.;
-var mousePositions = [ ];
+var attribColor;
+
+//Buffer
 var buffer;
+var bufferColor;
+
+//Operations sur uniforms
+var tx = 0;
+var ty = 0;
+var scale = 1;
+var angle = 0;
+
+//Uniforms
+var uTranslation;
+var uAngle;
+
+var time = 0;
 
 function initContext() {
     canvas = document.getElementById('dawin-webgl');
@@ -63,44 +77,64 @@ function initShaders() {
     gl.useProgram(program);
 }
 
-
-
-//Evenement souris
-function initEvents() {
-    canvas.onclick = function(e) {
-        //changement de repere pour les coordonnees de souris
-        var x = (e.pageX/canvas.width)*2.0 - 1.0;
-        var y = ((canvas.height-e.pageY)/canvas.height)*2.0 - 1.0;
-        mousePositions.push(x);
-        mousePositions.push(y);
-        draw();
-    }
-}
-
-//TODO
 //Fonction initialisant les attributs pour l'affichage (position et taille)
 function initAttributes() {
-    
+    attribPos = gl.getAttribLocation(program, "position");
+    attribColor = gl.getAttribLocation(program, "color");
+
+    uTranslation = gl.getUniformLocation(program, "translation");
+    uAngle = gl.getUniformLocation(program, "angle");
+
+    gl.enableVertexAttribArray(attribPos);
+    gl.enableVertexAttribArray(attribColor);
 }
 
 
-//TODO
+
 //Initialisation des buffers
 function initBuffers() {
-    
+    var points = [
+        -0.2, 0.2, 0.2,
+        0.2, -0.2, -0.2
+    ];
+
+    var colors = [
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0
+    ];
+
+    buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
+
+    bufferColor = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufferColor);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 }
 
-//TODO
-//Mise a jour des buffers : necessaire car les coordonnees des points sont ajoutees a chaque clic
-function refreshBuffers() {
-   
-}
 
-//TODO
 //Fonction permettant le dessin dans le canvas
 function draw() {
+    requestAnimationFrame(draw);
+
+    time += 0.01;
     gl.clear(gl.COLOR_BUFFER_BIT);
-    
+
+    angle = time % (2 * 3.14);
+
+    //Permet de "rebondir" sur les bords
+    tx = (time % 4 < 2) ? -1 + time % 4 : 1 - (time % 4 - 2.0);
+
+    gl.uniform1f(uAngle, angle);
+    gl.uniform1f(uTranslation, tx);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.vertexAttribPointer(attribPos, 2, gl.FLOAT, true, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufferColor);
+    gl.vertexAttribPointer(attribColor, 4, gl.FLOAT, false, 0, 0);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
 
@@ -109,6 +143,5 @@ function main() {
     initBuffers();
     initShaders();
     initAttributes();
-    initEvents();
     draw();
 }

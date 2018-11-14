@@ -1,97 +1,102 @@
 function loadText(url) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, false);
-    xhr.overrideMimeType("text/plain");
-    xhr.send(null);
-    if (xhr.status === 200)
-        return xhr.responseText;
-    else {
-        return null;
-    }
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, false);
+  xhr.overrideMimeType("text/plain");
+  xhr.send(null);
+  if (xhr.status === 200)
+    return xhr.responseText;
+  else {
+    return null;
+  }
+}
+
+function c_random() {
+  return Math.random() * (1 - 0);
 }
 
 // variables globales du programme;
 var canvas;
+var width, height;
 var gl; //contexte
 var program; //shader program
+var buffer;
 var attribPos; //attribute position
-var pointSize = 10.;
-var mousePositions = [[]];
+var attribSize; //attribute size
+var uniformColor; //uniform color
+var pointSize = 20;
+var pointColor = [1.0, 1.0, 0.0];
 
 function initContext() {
-    canvas = document.getElementById('dawin-webgl');
-    gl = canvas.getContext('webgl');
-    if (!gl) {
-        console.log('ERREUR : echec chargement du contexte');
-        return;
-    }
-    gl.clearColor(0.2, 0.2, 0.2, 1.0);
+  canvas = document.getElementById('dawin-webgl');
+  width = canvas.clientWidth;
+  height = canvas.clientHeight;
+  gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+  if (!gl) {
+    console.log('ERREUR : echec chargement du contexte');
+    return;
+  }
+  gl.clearColor(c_random(), c_random(), c_random(), 1);
 }
 
 //Initialisation des shaders et du program
 function initShaders() {
-    var fragmentSource = loadText('fragment.glsl');
-    var vertexSource = loadText('vertex.glsl');
+  var vertex_source = loadText("vertex.glsl");
+  var vertex = gl.createShader(gl.VERTEX_SHADER);
+  gl.shaderSource(vertex, vertex_source);
+  gl.compileShader(vertex);
 
-    var fragment = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragment, fragmentSource);
-    gl.compileShader(fragment);
+  var fragment_source = loadText("fragment.glsl");
+  var fragment = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(fragment, fragment_source);
+  gl.compileShader(fragment);
 
-    var vertex = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vertex, vertexSource);
-    gl.compileShader(vertex);
+  console.log("Vertex Shader Compile Status: " + gl.getShaderParameter(vertex, gl.COMPILE_STATUS));
+  console.log("Fragment Shader Compile Status: " + gl.getShaderParameter(fragment, gl.COMPILE_STATUS));
 
-    gl.getShaderParameter(fragment, gl.COMPILE_STATUS);
-    gl.getShaderParameter(vertex, gl.COMPILE_STATUS);
+  program = gl.createProgram();
+  gl.attachShader(program, vertex);
+  gl.attachShader(program, fragment);
 
-    if (!gl.getShaderParameter(fragment, gl.COMPILE_STATUS)) {
-        console.log(gl.getShaderInfoLog(fragment));
-    }
-
-    if (!gl.getShaderParameter(vertex, gl.COMPILE_STATUS)) {
-        console.log(gl.getShaderInfoLog(vertex));
-    }
-
-    program = gl.createProgram();
-    gl.attachShader(program, fragment);
-    gl.attachShader(program, vertex);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.log("Could not initialise shaders");
-    }
-    gl.useProgram(program);
+  gl.linkProgram(program);
+  console.log("Program Link Status: " + gl.getProgramParameter(program, gl.LINK_STATUS));
+  gl.useProgram(program);
 }
 
 //Fonction initialisant les attributs pour l'affichage (position et taille)
 function initAttributes() {
-    gl.bindAttribLocation(program, 0, "position");
-}
-
-//Evenement souris
-function initEvents() {
-    canvas.onclick = function (e) {
-        //changement de repere pour les coordonnees de souris
-        var mousePos = []
-        mousePos[0] = (e.pageX / canvas.width) * 2.0 - 1.0;
-        mousePos[1] = ((canvas.height - e.pageY) / canvas.height) * 2.0 - 1.0;
-        mousePositions.push(mousePos);
-        draw();
-    }
+  attribPos = gl.getAttribLocation(program, "position");
+  attribSize = gl.getAttribLocation(program, "size");
+  uniformColor = gl.getUniformLocation(program, "fragColor");
 }
 
 //Fonction permettant le dessin dans le canvas
 function draw() {
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    for (var i = 0; i < mousePositions.length; i++) {
-        gl.vertexAttrib2f(0, mousePositions[i][0], mousePositions[i][1]);
-        gl.drawArrays(gl.POINTS, 0, 1);
-    }
+  gl.drawArrays(gl.POINTS, 0, 1);
 }
 
+
 function main() {
-    initContext();
-    initShaders();
-    initAttributes();
-    initEvents();
+  initContext();
+  initShaders();
+  initAttributes();
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  buffer = gl.createBuffer();
+
+  canvas.onclick = function (e) {
+    var x = e.offsetX / (width / 2) - 1;
+    var y = - (e.offsetY / (width / 2) - 1);
+    gl.vertexAttrib4f(attribPos, x, y, 0.0, 1.0);
+    gl.vertexAttrib1f(attribSize, Math.random() * 50);
+    gl.uniform4f(uniformColor, Math.random(), Math.random(), Math.random(), 1.0);
     draw();
+  }
+
+  for (var i = -0.8; i <= 0.8; i += 0.2) {
+    for (var j = -0.8; j <= 0.8; j += 0.2) {
+      gl.vertexAttrib4f(attribPos, i, j, 0.0, 1.0);
+      gl.vertexAttrib1f(attribSize, (i + 1) * pointSize + 5);
+      gl.uniform4f(uniformColor, ((i >= 0) ? Math.abs(i) + 0.5 : 0.0), .3, ((i <= 0) ? i + 0.5 : 0.0), 1.0);
+      draw();
+    }
+  }
 }
