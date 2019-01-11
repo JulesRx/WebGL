@@ -25,13 +25,13 @@ var buffers = [],
 
 var translationValues = { x: 0, y: 0, z: 0 };
 var rotationValues = { x: 0, y: 0, z: 0 };
-var scaleFactor = 1.0;
+var zoomFactor = 1.0;
 var yFov = 80;
 var cubeColor, altCubeColor;
 
 var xTranslationInput, yTranslationInput, zTranslationInput,
   xRotationInput, yRotationInput, zRotationInput,
-  scaleFactorInput,
+  zoomFactorInput,
   yFovInput,
   mousePressed = false,
   ctrlPressed = false;
@@ -187,9 +187,9 @@ function initInputs() {
     rotationValues.z = this.value;
   });
 
-  scaleFactorInput = document.getElementById('scaleFactorInput');
-  scaleFactorInput.addEventListener('input', function () {
-    scaleFactor = this.value;
+  zoomFactorInput = document.getElementById('zoomFactorInput');
+  zoomFactorInput.addEventListener('input', function () {
+    zoomFactor = this.value;
   });
 
   yFovInput = document.getElementById('yFovInput');
@@ -200,15 +200,6 @@ function initInputs() {
 }
 
 function initMouseEvents() {
-  canvas.addEventListener('wheel', function (e) {
-    e.preventDefault();
-
-    scaleFactor = (e.deltaY > 0) ? Math.min(scaleFactor + 0.02, 5)
-      : Math.max(scaleFactor - 0.02, 0.1);
-
-    scaleFactorInput.value = scaleFactor;
-  });
-
   canvas.addEventListener('mousedown', function () {
     mousePressed = true;
   });
@@ -236,7 +227,7 @@ function initMouseEvents() {
     }
 
     if (ctrlPressed) {
-      translationValues.x += (event.movementX/ 100);
+      translationValues.x += (event.movementX / 100);
       translationValues.x = translationValues.x - 2 * Math.PI * Math.floor((translationValues.x + Math.PI) / (2 * Math.PI))
       xTranslationInput.value = translationValues.x;
 
@@ -251,6 +242,21 @@ function initMouseEvents() {
       rotationValues.y -= (event.movementX / 100);
       rotationValues.y = rotationValues.y - 2 * Math.PI * Math.floor((rotationValues.y + Math.PI) / (2 * Math.PI))
       yRotationInput.value = rotationValues.y;
+    }
+  });
+
+  canvas.addEventListener('wheel', function (e) {
+    e.preventDefault();
+
+    if (ctrlPressed) {
+      translationValues.z = (e.deltaY > 0) ? Math.min(translationValues.z + 0.2, 10) : Math.max(translationValues.z - 0.2, -10);
+
+      zTranslationInput.value = translationValues.z;
+    } else {
+      zoomFactor = (e.deltaY > 0) ? Math.min(zoomFactor + 0.02, 5)
+        : Math.max(zoomFactor - 0.02, 0.1);
+
+      zoomFactorInput.value = zoomFactor;
     }
   });
 }
@@ -268,7 +274,7 @@ function refreshTransformations() {
   gl.uniformMatrix4fv(uniformTranslationMat, false, translationMat);
 
   var scaleMat = mat4.create();
-  var scaleVec = vec3.fromValues(scaleFactor, scaleFactor, scaleFactor, 1);
+  var scaleVec = vec3.fromValues(zoomFactor, zoomFactor, zoomFactor, 1);
   mat4.fromScaling(scaleMat, scaleVec);
   gl.uniformMatrix4fv(uniformScaleMat, false, scaleMat);
 }
@@ -280,6 +286,26 @@ function draw() {
   gl.drawArrays(gl.TRIANGLES, 0, vertexPositions.length / 3);
 
   requestAnimationFrame(draw);
+}
+
+function resetCube() {
+  translationValues = { x: 0, y: 0, z: 0 };
+  rotationValues = { x: 0, y: 0, z: 0 };
+  zoomFactor = 1.0;
+  yFov = 80;
+  initPerspective();
+
+  xTranslationInput.value = translationValues.x;
+  yTranslationInput.value = translationValues.y;
+  zTranslationInput.value = translationValues.z;
+
+  xRotationInput.value = rotationValues.x;
+  yRotationInput.value = rotationValues.y;
+  zRotationInput.value = rotationValues.y;
+
+  zoomFactorInput.value = zoomFactor;
+
+  yFovInput.value = yFov;
 }
 
 function main() {
