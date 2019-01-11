@@ -222,7 +222,7 @@ function initMouseEvents() {
   });
 
   document.addEventListener('keydown', function (e) {
-    if (e.keyCode == 17)
+    if (e.ctrlKey)
       ctrlPressed = true;
   });
 
@@ -236,13 +236,11 @@ function initMouseEvents() {
     }
 
     if (ctrlPressed) {
-      console.log('ctrl');
-
-      translationValues.x -= (event.movementY / 100);
+      translationValues.x += (event.movementX/ 100);
       translationValues.x = translationValues.x - 2 * Math.PI * Math.floor((translationValues.x + Math.PI) / (2 * Math.PI))
       xTranslationInput.value = translationValues.x;
 
-      translationValues.y -= (event.movementX / 100);
+      translationValues.y -= (event.movementY / 100);
       translationValues.y = translationValues.y - 2 * Math.PI * Math.floor((translationValues.y + Math.PI) / (2 * Math.PI))
       yTranslationInput.value = translationValues.y;
     } else {
