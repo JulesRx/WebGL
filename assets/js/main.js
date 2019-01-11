@@ -1,8 +1,7 @@
-// Get content of GLSL files
 function loadText(url) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url, false);
-  xhr.overrideMimeType("text/plain");
+  xhr.overrideMimeType('text/plain');
   xhr.send(null);
   if (xhr.status === 200)
     return xhr.responseText;
@@ -32,11 +31,13 @@ var cubeColor, altCubeColor;
 
 var xTranslationInput, yTranslationInput, zTranslationInput,
   xRotationInput, yRotationInput, zRotationInput,
-  scaleFactorInput, yFovInput, mousePressed = false,
-  colorPickerWrapper, colorPicker, currentColorElt, selectedColor = '#FFF';
+  scaleFactorInput,
+  yFovInput,
+  mousePressed = false,
+  ctrlPressed = false;
 
 function initContext() {
-  canvas = document.getElementById('main');
+  canvas = document.getElementById('canvas');
   gl = canvas.getContext('webgl');
   if (!gl) {
     console.error('ERREUR : Échec du chargement du contexte');
@@ -54,11 +55,11 @@ function setCanvasResolution() {
 }
 
 function initShaders() {
-  var vertexShaderSource = loadText("assets/glsl/vertex.glsl");
+  var vertexShaderSource = loadText('assets/glsl/vertex.glsl');
   var vertexShader = gl.createShader(gl.VERTEX_SHADER);
   gl.shaderSource(vertexShader, vertexShaderSource);
 
-  var fragmentShaderSource = loadText("assets/glsl/fragment.glsl");
+  var fragmentShaderSource = loadText('assets/glsl/fragment.glsl');
   var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
   gl.shaderSource(fragmentShader, fragmentShaderSource);
 
@@ -85,13 +86,13 @@ function initShaders() {
 }
 
 function initAttributes() {
-  attribPos = gl.getAttribLocation(program, "position");
-  attribColor = gl.getAttribLocation(program, "vertexColor");
+  attribPos = gl.getAttribLocation(program, 'position');
+  attribColor = gl.getAttribLocation(program, 'vertexColor');
 
-  uniformPerspectiveMat = gl.getUniformLocation(program, "perspective");
-  uniformTranslationMat = gl.getUniformLocation(program, "translation");
-  uniformRotationMat = gl.getUniformLocation(program, "rotation");
-  uniformScaleMat = gl.getUniformLocation(program, "scale");
+  uniformPerspectiveMat = gl.getUniformLocation(program, 'perspective');
+  uniformTranslationMat = gl.getUniformLocation(program, 'translation');
+  uniformRotationMat = gl.getUniformLocation(program, 'rotation');
+  uniformScaleMat = gl.getUniformLocation(program, 'scale');
 }
 
 function initPerspective() {
@@ -145,14 +146,14 @@ function initBuffers() {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColors), gl.STATIC_DRAW);
   gl.vertexAttribPointer(attribColor, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(attribColor);
-  buffers["color"] = colorBuffer;
+  buffers['color'] = colorBuffer;
 
   var posBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositions), gl.STATIC_DRAW);
   gl.vertexAttribPointer(attribPos, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(attribPos);
-  buffers["pos"] = posBuffer;
+  buffers['pos'] = posBuffer;
 }
 
 function initInputs() {
@@ -196,27 +197,6 @@ function initInputs() {
     yFov = this.value;
     initPerspective();
   });
-
-  currentColorElt = document.getElementById('currentHexColor');
-  colorPickerWrapper = document.getElementById('colorPicker');
-  initColorPicker();
-}
-
-function initColorPicker() {
-  colorPickerWrapper.innerHTML = '';
-
-  colorPicker = new iro.ColorPicker(colorPickerWrapper, {
-    color: selectedColor
-  });
-
-  colorPicker.on("color:change", function (color) {
-    selectedColor = color.hexString.toUpperCase();
-    currentColorElt.innerText = selectedColor;
-
-    cubeColor = Object.values(color.rgb).map(comp => comp / 255);
-    altCubeColor = cubeColor.map(color => { return (color > 0.85) ? color - 0.1 : color + 0.1 });
-    refreshColor();
-  });
 }
 
 function initMouseEvents() {
@@ -241,29 +221,40 @@ function initMouseEvents() {
     mousePressed = false;
   });
 
+  document.addEventListener('keydown', function (e) {
+    if (e.keyCode == 17)
+      ctrlPressed = true;
+  });
+
+  document.addEventListener('keyup', function (e) {
+    ctrlPressed = false;
+  });
+
   canvas.addEventListener('mousemove', function (e) {
     if (!mousePressed) {
       return;
     }
-    rotationValues.x -= (event.movementY / 100);
-    rotationValues.x = rotationValues.x - 2 * Math.PI * Math.floor((rotationValues.x + Math.PI) / (2 * Math.PI))
-    xRotationInput.value = rotationValues.x;
 
-    rotationValues.y -= (event.movementX / 100);
-    rotationValues.y = rotationValues.y - 2 * Math.PI * Math.floor((rotationValues.y + Math.PI) / (2 * Math.PI))
-    yRotationInput.value = rotationValues.y;
+    if (ctrlPressed) {
+      console.log('ctrl');
+
+      translationValues.x -= (event.movementY / 100);
+      translationValues.x = translationValues.x - 2 * Math.PI * Math.floor((translationValues.x + Math.PI) / (2 * Math.PI))
+      xTranslationInput.value = translationValues.x;
+
+      translationValues.y -= (event.movementX / 100);
+      translationValues.y = translationValues.y - 2 * Math.PI * Math.floor((translationValues.y + Math.PI) / (2 * Math.PI))
+      yTranslationInput.value = translationValues.y;
+    } else {
+      rotationValues.x -= (event.movementY / 100);
+      rotationValues.x = rotationValues.x - 2 * Math.PI * Math.floor((rotationValues.x + Math.PI) / (2 * Math.PI))
+      xRotationInput.value = rotationValues.x;
+
+      rotationValues.y -= (event.movementX / 100);
+      rotationValues.y = rotationValues.y - 2 * Math.PI * Math.floor((rotationValues.y + Math.PI) / (2 * Math.PI))
+      yRotationInput.value = rotationValues.y;
+    }
   });
-}
-
-function refreshColor() {
-  vertexColors = [
-    Array(12).fill([altCubeColor[0], cubeColor[1], cubeColor[2]]).flat(),
-    Array(12).fill([cubeColor[0], altCubeColor[1], cubeColor[2]]).flat(),
-    Array(12).fill([cubeColor[0], cubeColor[1], altCubeColor[2]]).flat()
-  ].flat();
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffers["color"]);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexColors), gl.STATIC_DRAW);
 }
 
 function refreshTransformations() {
@@ -308,6 +299,5 @@ function main() {
 
   window.addEventListener('resize', function () {
     initPerspective();
-    initColorPicker(); // Color picker not responsive by default
   });
 }
