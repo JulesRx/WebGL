@@ -324,4 +324,10 @@ function main() {
   window.addEventListener('resize', function () {
     initPerspective();
   });
+
+  const help = document.getElementById('help');
+  help.addEventListener('click', function () {
+    let controls = document.getElementById('controls');
+    controls.style.display == 'none' ? controls.style.display = 'block' : controls.style.display = 'none';
+  });
 }

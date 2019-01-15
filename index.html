@@ -15,25 +15,30 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-3 settings-col d-none d-md-block">
-        <h2 class="text-center mt-4 mb-4">WebGL</h2>
+      <div class="col-md-3 settings d-none d-md-block">
+        <h2 class="text-center mt-4 mb-4">
+          <a href="./tp.pdf">
+            WebGL
+          </a>
+        </h2>
 
-        <h5>Controls</h5>
+        <div id="controls" style="display:none">
+          <h5>Controls</h5>
 
-        <dl>
-          <dt>Click + Drag</dt>
-          <dd>Change x & y Rotation</dd>
+          <dl>
+            <dt>Click + Drag</dt>
+            <dd>Change x & y Rotation</dd>
 
-          <dt>Control+ Click + Drag</dt>
-          <dd>Change x & y Translation</dd>
+            <dt>Control+ Click + Drag</dt>
+            <dd>Change x & y Translation</dd>
 
-          <dt>Scroll</dt>
-          <dd>Change Zoom</dd>
+            <dt>Scroll</dt>
+            <dd>Change Zoom</dd>
 
-          <dt>Control + Scroll</dt>
-          <dd>Change z Translation</dd>
-        </dl>
-
+            <dt>Control + Scroll</dt>
+            <dd>Change z Translation</dd>
+          </dl>
+        </div>
 
         <h5>Translation</h5>
 
@@ -111,6 +116,8 @@
         </canvas>
       </div>
     </div>
+
+    <span id="help">?</span>
   </div>
 
   <script src="./assets/js/gl-matrix.min.js"></script>
