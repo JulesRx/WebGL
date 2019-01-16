@@ -228,11 +228,9 @@ function initMouseEvents() {
 
     if (ctrlPressed) {
       translationValues.x += (event.movementX / 100);
-      translationValues.x = translationValues.x - 2 * Math.PI * Math.floor((translationValues.x + Math.PI) / (2 * Math.PI))
       xTranslationInput.value = translationValues.x;
 
       translationValues.y -= (event.movementY / 100);
-      translationValues.y = translationValues.y - 2 * Math.PI * Math.floor((translationValues.y + Math.PI) / (2 * Math.PI))
       yTranslationInput.value = translationValues.y;
     } else {
       rotationValues.x -= (event.movementY / 100);
