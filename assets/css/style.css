@@ -73,3 +73,55 @@ input[type="range"]::-moz-range-thumb {
   font-size: 18px;
   cursor: pointer;
 }
+
+
+
+/* h2 {
+  position: relative;
+  font-size: 30px;
+  z-index: 1;
+  overflow: hidden;
+  text-align: center;
+}
+h2:before, h2:after {
+  position: absolute;
+  top: 51%;
+  overflow: hidden;
+  width: 50%;
+  height: 1px;
+  content: '\a0';
+  background-color: red;
+}
+h2:before {
+  margin-left: -50%;
+  text-align: right;
+} */
+
+
+h2{
+  line-height: 0.5;
+  text-align: center;
+}
+h2 span {
+  display: inline-block;
+  position: relative;
+}
+h2 span:before,
+h2 span:after {
+  content: "";
+  position: absolute;
+  height: 5px;
+  border-bottom: 1px solid #222;
+  border-top: 1px solid #222;
+  top: 0;
+  width: 100px;
+  margin-top: 5px;
+}
+h2 span:before {
+  right: 100%;
+  margin-right: 15px;
+}
+h2 span:after {
+  left: 100%;
+  margin-left: 15px;
+}
