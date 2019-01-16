@@ -44,7 +44,6 @@ input[type="range"] {
   -webkit-transition: 0.2s;
   transition: opacity 0.2s;
 }
-
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -54,7 +53,6 @@ input[type="range"]::-webkit-slider-thumb {
   background: orangered;
   cursor: pointer;
 }
-
 input[type="range"]::-moz-range-thumb {
   width: 18px;
   height: 18px;
@@ -63,8 +61,7 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
-
-#help{
+#help {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -74,31 +71,7 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
-
-
-/* h2 {
-  position: relative;
-  font-size: 30px;
-  z-index: 1;
-  overflow: hidden;
-  text-align: center;
-}
-h2:before, h2:after {
-  position: absolute;
-  top: 51%;
-  overflow: hidden;
-  width: 50%;
-  height: 1px;
-  content: '\a0';
-  background-color: red;
-}
-h2:before {
-  margin-left: -50%;
-  text-align: right;
-} */
-
-
-h2{
+h2 {
   line-height: 0.5;
   text-align: center;
 }
